@@ -13,7 +13,7 @@ const client = new Vision.ImageAnnotatorClient({
 
 export const exampleRouter = createTRPCRouter({
   uploadImage: publicProcedure
-    .input(z.object({ base64: z.string() }))
+    .input(z.object({ base64: z.string(), lang: z.string() }))
     .mutation(async ({ input }) => {
       try {
         const image64 = input.base64.split(",")[1];
@@ -27,7 +27,7 @@ export const exampleRouter = createTRPCRouter({
             content: image64,
           },
           imageContext: {
-            languageHints: ["ja"],
+            languageHints: [input.lang],
           },
         });
 

@@ -1,21 +1,31 @@
+// HACK: fix all the project later
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import SignaturePad from "signature_pad";
 import { buttonVariants } from "~/components/button";
 import { api } from "~/utils/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 const WIDTH = 900;
 const HEIGHT = 300;
 
+const validator = z.object({
+  text: z.string(),
+  language: z.enum(["ja", "ar", "en", "es", "ko", "ru", "hi"]),
+});
+
 export default function Home() {
-  const uploadImageMutation = api.example.uploadImage.useMutation({
-    // onSuccess: () => clearPad(),
+  const uploadImageMutation = api.example.uploadImage.useMutation();
+
+  const { register, handleSubmit } = useForm<z.input<typeof validator>>({
+    resolver: zodResolver(validator),
   });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const padRef = useRef<SignaturePad>();
-  // const [imageURL, setImageUrl] = useState<string | undefined>(undefined);
-  const [text, setText] = useState("");
+  const [imageURL, setImageUrl] = useState<string | undefined>();
 
   const undoPad = () => {
     if (!padRef.current) throw Error("UNDO: no pad ref!");
@@ -51,15 +61,31 @@ export default function Home() {
       </Head>
 
       <main className="m-4">
-        <div>
-          <p>Text: {text}</p>
+        <form
+          onSubmit={handleSubmit((data) => {
+            uploadImageMutation.mutate({
+              lang: data.language,
+              base64: imageURL ?? "",
+            });
+          })}
+        >
           <input
             className="rounded-lg border-2 border-black p-2"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
+            {...register("text")}
           />
-          <select></select>
-        </div>
+          <select {...register("language")}>
+            <option value="ja">japanese</option>
+            <option value="ar">arabic</option>
+            <option value="en">english</option>
+            <option value="es">spanish</option>
+            <option value="ko">korean</option>
+            <option value="ru">russian</option>
+            <option value="hi">hindi</option>
+          </select>
+          <button className={buttonVariants()} type="submit">
+            Submit
+          </button>
+        </form>
 
         <div className="my-8" />
 
@@ -90,11 +116,10 @@ export default function Home() {
               }
 
               const dataURL = padRef.current.toDataURL();
-              uploadImageMutation.mutate({ base64: dataURL });
-              // setImageUrl(dataURL);
+              setImageUrl(dataURL);
             }}
           >
-            Submit
+            Load Image
           </button>
         </div>
         <div className="my-8" />
@@ -105,7 +130,7 @@ export default function Home() {
               className={buttonVariants()}
               onClick={() => {
                 uploadImageMutation.reset();
-                // setImageUrl(undefined);
+                setImageUrl(undefined);
               }}
             >
               Reset
