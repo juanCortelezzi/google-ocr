@@ -14,7 +14,7 @@ export default function Home() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const padRef = useRef<SignaturePad>();
-  const [imageURL, setImageUrl] = useState<string | undefined>(undefined);
+  // const [imageURL, setImageUrl] = useState<string | undefined>(undefined);
   const [text, setText] = useState("");
 
   const undoPad = () => {
@@ -23,6 +23,7 @@ export default function Home() {
     data.pop();
     padRef.current.fromData(data);
   };
+
   const clearPad = () => {
     if (!padRef.current) throw Error("CLEAR: no pad ref!");
     padRef.current.clear();
@@ -35,7 +36,6 @@ export default function Home() {
     if (!context) throw Error("Could not get context");
 
     const pad = new SignaturePad(canvas, {
-      // backgroundColor: "#aaa",
       minWidth: 5,
       maxWidth: 10,
     });
@@ -50,74 +50,82 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div>
-        <p>Text: {text}</p>
-        <input
-          className="m-4 rounded-lg border-2 border-black p-2"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-      </div>
-
-      <div className="my-8" />
-
-      <canvas
-        ref={canvasRef}
-        width={WIDTH}
-        height={HEIGHT}
-        className="rounded-lg border-2 border-black"
-      />
-
-      <div>
-        <button className={buttonVariants()} onClick={clearPad}>
-          Clear
-        </button>
-
-        <button className={buttonVariants()} onClick={undoPad}>
-          Undo
-        </button>
-        <button
-          className={buttonVariants()}
-          onClick={() => {
-            if (!canvasRef.current) throw Error("SUBMIT: no canvas ref!");
-            if (!padRef.current) throw Error("SUBMIT: no pad ref!");
-            if (padRef.current.isEmpty()) {
-              console.log("SUBMIT: pad is empty");
-              return;
-            }
-
-            const dataURL = padRef.current.toDataURL();
-            uploadImageMutation.mutate({ base64: dataURL });
-            setImageUrl(dataURL);
-          }}
-        >
-          Submit
-        </button>
-      </div>
-      <div>
+      <main className="m-4">
         <div>
-          <span>Mutation results</span>
+          <p>Text: {text}</p>
+          <input
+            className="rounded-lg border-2 border-black p-2"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <select></select>
+        </div>
+
+        <div className="my-8" />
+
+        <canvas
+          ref={canvasRef}
+          width={WIDTH}
+          height={HEIGHT}
+          className="rounded-lg border-2 border-black"
+        />
+        <div className="my-8" />
+
+        <div>
+          <button className={buttonVariants()} onClick={clearPad}>
+            Clear
+          </button>
+
+          <button className={buttonVariants()} onClick={undoPad}>
+            Undo
+          </button>
           <button
             className={buttonVariants()}
             onClick={() => {
-              uploadImageMutation.reset();
-              setImageUrl(undefined);
+              if (!canvasRef.current) throw Error("SUBMIT: no canvas ref!");
+              if (!padRef.current) throw Error("SUBMIT: no pad ref!");
+              if (padRef.current.isEmpty()) {
+                console.log("SUBMIT: pad is empty");
+                return;
+              }
+
+              const dataURL = padRef.current.toDataURL();
+              uploadImageMutation.mutate({ base64: dataURL });
+              // setImageUrl(dataURL);
             }}
           >
-            Reset
+            Submit
           </button>
         </div>
-        {uploadImageMutation.isError && (
-          <p className="text-red-500">{uploadImageMutation.error.message}</p>
+        <div className="my-8" />
+        <div>
+          <div>
+            <span>Mutation results</span>
+            <button
+              className={buttonVariants()}
+              onClick={() => {
+                uploadImageMutation.reset();
+                // setImageUrl(undefined);
+              }}
+            >
+              Reset
+            </button>
+          </div>
+          {uploadImageMutation.isError && (
+            <p className="text-red-500">{uploadImageMutation.error.message}</p>
+          )}
+          {uploadImageMutation.isLoading && (
+            <p className="text-amber-500">LOADING....</p>
+          )}
+          {uploadImageMutation.isSuccess && (
+            <p className="text-green-500">Great Success!</p>
+          )}
+        </div>
+        {/* <div>{imageURL && <img src={imageURL} alt="my image" />}</div> */}
+        {uploadImageMutation.data && (
+          <pre>{JSON.stringify(uploadImageMutation.data, null, 2)}</pre>
         )}
-        {uploadImageMutation.isLoading && (
-          <p className="text-amber-500">LOADING....</p>
-        )}
-        {uploadImageMutation.isSuccess && (
-          <p className="text-green-500">Great Success!</p>
-        )}
-      </div>
-      <div>{imageURL && <img src={imageURL} alt="my image" />}</div>
+      </main>
     </>
   );
 }

@@ -3,7 +3,7 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import Vision from "@google-cloud/vision";
 
 const client = new Vision.ImageAnnotatorClient({
-  keyFilename: "/home/wiz/Downloads/rl-members-area-b7cd9f9b3313.json",
+  keyFilename: "google-vision-keys.json",
 });
 
 export const exampleRouter = createTRPCRouter({
@@ -25,7 +25,9 @@ export const exampleRouter = createTRPCRouter({
         },
       });
 
-      console.log("SERVER1:", ocrResult.textAnnotations);
-      console.log("SERVER2:", ocrResult.fullTextAnnotation);
+      // console.log("SERVER1:", ocrResult.textAnnotations);
+      // console.log("SERVER2:", ocrResult.fullTextAnnotation);
+
+      return ocrResult;
     }),
 });
