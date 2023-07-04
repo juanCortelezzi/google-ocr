@@ -13,7 +13,7 @@ const client = new Vision.ImageAnnotatorClient({
 
 export const exampleRouter = createTRPCRouter({
   uploadImage: publicProcedure
-    .input(z.object({ base64: z.string(), lang: z.string() }))
+    .input(z.object({ base64: z.string(), lang: z.string(), text: z.string() }))
     .mutation(async ({ input }) => {
       try {
         const image64 = input.base64.split(",")[1];
@@ -31,9 +31,21 @@ export const exampleRouter = createTRPCRouter({
           },
         });
 
-        return ocrResult;
+        const textAnotations = ocrResult.textAnnotations ?? [];
+        const parsedAnotations = [
+          ...new Set(
+            textAnotations.map((a) => a.description).filter(Boolean)
+          ).values(),
+        ];
+
+        return parsedAnotations.map((a) => {
+          if (a === input.text) {
+            return [a, 100];
+          }
+          return [a, 0];
+        });
       } catch {
-        return "we had an oppsie daisy!!";
+        return;
       }
     }),
 });
