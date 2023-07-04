@@ -8,7 +8,9 @@ export const env = createEnv({
    */
   server: {
     NODE_ENV: z.enum(["development", "test", "production"]),
-    GOOGLE_APPLICATION_CREDENTIALS: z.string(),
+    CLIENT_EMAIL: z.string().email(),
+    PRIVATE_KEY: z.string(),
+    PROJECT_ID: z.string(),
   },
 
   /**
@@ -26,7 +28,10 @@ export const env = createEnv({
    */
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
-    GOOGLE_APPLICATION_CREDENTIALS: process.env.NODE_ENV,
+    CLIENT_EMAIL: process.env.CLIENT_EMAIL,
+    PROJECT_ID: process.env.PROJECT_ID,
+    PRIVATE_KEY: process.env.PRIVATE_KEY,
+    // GOOGLE_APPLICATION_CREDENTIALS: process.env.NODE_ENV,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
