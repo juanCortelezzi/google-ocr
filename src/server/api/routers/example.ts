@@ -2,9 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import Vision from "@google-cloud/vision";
 
-const client = new Vision.ImageAnnotatorClient({
-  keyFilename: "google-vision-keys.json",
-});
+const client = new Vision.ImageAnnotatorClient();
 
 export const exampleRouter = createTRPCRouter({
   uploadImage: publicProcedure
